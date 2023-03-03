@@ -172,6 +172,7 @@ pub fn relabel_code(args: &RelabelCodeArgs) {
         .open(&args.outfile)
         .expect("Failed to open OUTFILE for writing");
     let mut writer = BufWriter::new(underlying_stream);
+    writeln!(writer, "input\toutput").unwrap();
     reader.lines()
         .progress_with(pb.clone())
         .map(|line| {

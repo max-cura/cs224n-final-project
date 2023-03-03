@@ -1,6 +1,6 @@
 #!/bin/sh
 
-preproc-fast/target/release/preproc-fast \
+bin/preproc-fast \
   generate-revision-set \
     --in-history data/inputs/PostHistory.xml \
     --in-qidx data/proc/question_idx.txt \

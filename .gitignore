@@ -1,9 +1,10 @@
 /so-cs224n
 /eval.py
 /run.py
-/source/data
+/data
 .idea
-/source/preproc-fast/target
+/preproc-fast/target
 .DS_Store
 224n_ibit/__pycache__
-
+/bin
+/t5-small-soq

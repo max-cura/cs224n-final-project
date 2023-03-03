@@ -1,12 +1,12 @@
 from datasets import load_dataset
 
 def prepare_soq_dataset_from_file(
-        dataset_path,
+        dataset_paths,
         tokenizer,
-        generation_prefix = None,
+        generation_prefix = '',
         tokenizer_max_length = None,
 ):
-    raw = load_dataset("csv", data_files=dataset_path, sep="\t", on_bad_lines='skip')
+    raw = load_dataset("csv", data_files=dataset_paths, sep="\t", on_bad_lines='skip')
     filtered = raw.filter(lambda x: x["input"] is not None and x["output"] is not None)
 
     def soq_tokenize(examples):

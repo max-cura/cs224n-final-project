@@ -1,6 +1,6 @@
 #!/bin/sh
 
-preproc-fast/target/release/preproc-fast \
+bin/preproc-fast \
   generate-question-index  \
     --in-file data/inputs/Posts.xml \
     --out-file data/proc/question_idx.txt \
