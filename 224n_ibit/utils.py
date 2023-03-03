@@ -28,9 +28,9 @@ def prepare_soq_dataset_from_file(
     dataset = filtered.map(soq_tokenize, batched=True)
     return dataset
 
-def batched_range_iter(start, end):
+def batched_range_iter(start, end, batch_size):
     batch_start = start
     while batch_start < end:
-        yield batch_start, min(batch_start+args.batch_size, end)
-        batch_start += args.batch_size
+        yield batch_start, min(batch_start+batch_size, end)
+        batch_start += batch_size
 

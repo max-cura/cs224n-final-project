@@ -30,7 +30,7 @@ tokenizer = T5TokenizerFast.from_pretrained(
     args.use_tokenizer,
     model_max_length=args.max_length
 )
-model = T5ForConditionalGeneration.from_pretrained(args.model)
+model = T5ForConditionalGeneration.from_pretrained(args.model).to(device)
 
 if not os.path.isdir(args.model) or not os.path.isfile(args.evaluation_dataset):
     raise ValueError(f"bad path for model or evaluation dataset")
@@ -44,12 +44,12 @@ tch_dataset = dataset.with_format("torch")
 
 print("Starting predictions...")
 
-predictions = torch.zeros(tch_dataset['train']['input_ids'].shape)
+predictions = torch.zeros(tch_dataset['train']['input_ids'].shape, dtype=torch.int)
 
 with torch.no_grad():
     batch_count = (len(tch_dataset['train']) + args.batch_size - 1) // args.batch_size
     for batch_start, batch_end in tqdm(
-            utils.batched_range_iter(0, len(tch_dataset['train'])),
+            utils.batched_range_iter(0, len(tch_dataset['train']), batch_size=args.batch_size),
             total=batch_count):
         # print(f"Batch {batch_start}:{batch_end}")
         batch_inputs = tch_dataset['train']['input_ids'][batch_start:batch_end].to(device)
@@ -63,10 +63,10 @@ with torch.no_grad():
                 max_length=args.max_length,
             )
         ).to('cpu')
-        predictions[batch_start:batch_end, 0:batch_predictions.shape[1]] = batch_predictions[:, :]
+        predictions[batch_start:batch_end, 0:batch_predictions.shape[1]] = batch_predictions[:, :].type(dtype=torch.int)
 
-print(predictions.shape)
-print(predictions[0])
+#print(predictions.shape)
+#print(predictions[0])
 
 print("Finished predictions, evaluating...")
 
