@@ -4,12 +4,9 @@ import numpy as np
 import torch
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, AutoTokenizer, DataCollatorForSeq2Seq, \
     AutoModelForSeq2SeqLM
-from datasets import load_dataset, load_metric
-from tqdm import tqdm
+from datasets import load_dataset
 from argparse import ArgumentParser
 import evaluate
-
-import utils
 
 argp = ArgumentParser()
 argp.add_argument("--use-tokenizer", required=True)
