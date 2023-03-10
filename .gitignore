@@ -8,3 +8,4 @@
 224n_ibit/__pycache__
 /bin
 /t5-small-soq
+.env

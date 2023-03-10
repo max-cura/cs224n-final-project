@@ -43,7 +43,7 @@ tch_dataset = dataset.with_format("torch")
 
 print("Starting predictions...")
 
-predictions = torch.zeros(tch_dataset['train']['input_ids'].shape, dtype=torch.int)
+predictions = torch.zeros((tch_dataset['train']['input_ids'].shape[0], args.max_length+1), dtype=torch.int)
 
 with torch.no_grad():
     batch_count = (len(tch_dataset['train']) + args.batch_size - 1) // args.batch_size

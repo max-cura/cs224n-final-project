@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 bin/preproc-fast \
   generate-revision-set \

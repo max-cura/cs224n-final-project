@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if ! [ -d $SPLIT_OUTPUT_DIR ] ; then
   echo "SPLIT_OUTPUT_DIR does not have a valid directory"
