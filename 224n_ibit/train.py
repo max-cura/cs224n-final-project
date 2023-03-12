@@ -21,7 +21,8 @@ argp.add_argument("--use-model", required=True)
 argp.add_argument("--model-dir", required=True)
 argp.add_argument("--metric", default="sacrebleu")
 argp.add_argument("--train-batch-size", type=int, default=8)
-argp.add_argument("--max-length", type=int, default=2048)
+argp.add_argument("--test-batch-size", type=int, default=8)
+argp.add_argument("--max-length", type=int, default=1024)
 argp.add_argument("--use-generation-prefix", default="soq: ")
 # argp.add_argument("--trained-model-name", required=True)
 args = argp.parse_args()
@@ -109,31 +110,37 @@ else:
 
 trainer_args = Seq2SeqTrainingArguments(
     output_dir=args.model_dir,
-    evaluation_strategy="epoch",
-    eval_steps=10,
-    logging_strategy="epoch",
-    save_strategy="epoch",
-    # since this defaults to AdamW
-    #learning_rate=(3e-4 if 't5' in args.use_model else 4e-5),
-    learning_rate=4e-5,
+    evaluation_strategy="steps",
+    eval_steps=100,
+    logging_strategy="steps",
+    logging_steps=100,
+    save_strategy="steps",
+    save_steps=100,
+    # For AdamW on T5, use 3e-4 instead of e.g. 4e-5
+    learning_rate=3e-4,
     per_device_train_batch_size=args.train_batch_size,
-    per_device_eval_batch_size=args.train_batch_size,
+    per_device_eval_batch_size=args.test_batch_size,
     weight_decay=0.01,
     save_total_limit=3,
     num_train_epochs=10,
     predict_with_generate=True,
     load_best_model_at_end=True,
     metric_for_best_model=args.metric,
-    # report_to=["tensorboard"],
+    report_to=["tensorboard"],
     #gradient_accumulation_steps=4,
-    gradient_checkpointing=True,
+    #gradient_checkpointing=True,
     #use_cache=False,
-    optim="adafactor",
+    #optim="adafactor",
     dataloader_num_workers=8,
 )
 
 data_collator = DataCollatorForSeq2Seq(tokenizer)
 metric = evaluate.load(args.metric)
+
+def compute_metrics2(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -148,17 +155,7 @@ def compute_metrics(eval_pred):
     references = tokenizer.batch_decode(labels, skip_special_tokens=True)
     result = metric.compute(predictions=predictions, references=references)
     print(result)
-    return result
-
-#class CustomSeq2SeqTrainer(Seq2SeqTrainer):
-#    def get_train_dataloader(self):
-#        train_dataloader = DataLoader(
-#                dataset["train"],
-#                batch_size=trainer_args.per_device_train_batch_size,
-#                pin_memory=True,
-#                num_workers=8
-#        )
-#        return train_dataloader
+    return {'eval_sacrebleu': result['score']}
 
 trainer = Seq2SeqTrainer(
     model_init=lambda: AutoModelForSeq2SeqLM.from_pretrained(args.use_model),
@@ -169,7 +166,7 @@ trainer = Seq2SeqTrainer(
     tokenizer=tokenizer,
 
     compute_metrics=compute_metrics,
-    # optimizers=(torch.optim.AdamW, None)
+    #optimizers=(torch.optim.AdamW, None)
 )
 
 print("")

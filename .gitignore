@@ -9,3 +9,4 @@
 /bin
 /t5-small-soq
 .env
+clang
