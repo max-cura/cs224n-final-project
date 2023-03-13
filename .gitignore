@@ -10,3 +10,4 @@
 /t5-small-soq
 .env
 clang
+nohup.out
