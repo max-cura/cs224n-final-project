@@ -22,6 +22,7 @@ def prepare_soq_dataset_from_file(
             padding="max_length",
             truncation=True,
             return_tensors="pt")
+        model_inputs["input"] = inputs
         model_inputs["output"] = outputs
         return model_inputs
 

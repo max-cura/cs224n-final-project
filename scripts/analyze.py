@@ -17,6 +17,8 @@ argp.add_argument("--use-generation-prefix", default="soq: ")
 argp.add_argument("--max-length", type=int, default=512)
 argp.add_argument("--metric", default="sacrebleu")
 argp.add_argument("--batch-size", type=int, default=64)
+argp.add_argument("--output", default=None)
+argp.add_argument("--remove-quotes", default=False)
 args = argp.parse_args()
 
 # DEVICE
@@ -71,10 +73,32 @@ print("Finished predictions, evaluating...")
 
 metric = evaluate.load(args.metric)
 
-predictions_decoded = tokenizer.batch_decode(predictions, skip_special_tokens=True)
+predictions_decoded = tokenizer.batch_decode(predictions, skip_special_tokens=True, remove_special_characters=True)
 
-results = metric.compute(
+if args.remove_quotes == "True":
+    print("Removing quotes...")
+    predictions_decoded_no_quotes = []
+    for prediction in predictions_decoded:
+        predictions_decoded_no_quotes.append(prediction.replace("&quot;", ""))
+    references_no_quotes = []
+    for reference in dataset['train']['output']:
+        references_no_quotes.append(reference.replace("&quot;", ""))
+    results = metric.compute(predictions=predictions_decoded_no_quotes, references=references_no_quotes)
+    print(results)
+    
+if args.output is not None:
+    def reencode(text):
+        return text.replace("\n", "&#xD;&#xA;")
+    f = open(args.output, "w")
+    for i in range(0, len(predictions_decoded)):
+        f.write(f"{reencode(dataset['train']['input'][i])}\t{reencode(dataset['train']['output'][i])}\t{reencode(predictions_decoded[i])}\n")
+        print(predictions_decoded[i])
+    f.close()
+
+else:
+    results = metric.compute(
     predictions=predictions_decoded,
     references=dataset['train']['output']
 )
-print(results)
+    print(results)
+
