@@ -111,13 +111,14 @@ else:
 trainer_args = Seq2SeqTrainingArguments(
     output_dir=args.model_dir,
     evaluation_strategy="steps",
-    eval_steps=100,
+    eval_steps=400,
     logging_strategy="steps",
-    logging_steps=100,
+    logging_steps=400,
     save_strategy="steps",
-    save_steps=100,
+    save_steps=400,
     # For AdamW on T5, use 3e-4 instead of e.g. 4e-5
     learning_rate=3e-4,
+    #learning_rate=4e-5,
     per_device_train_batch_size=args.train_batch_size,
     per_device_eval_batch_size=args.test_batch_size,
     weight_decay=0.01,
@@ -125,7 +126,7 @@ trainer_args = Seq2SeqTrainingArguments(
     num_train_epochs=10,
     predict_with_generate=True,
     load_best_model_at_end=True,
-    metric_for_best_model=args.metric,
+    metric_for_best_model='loss',
     report_to=["tensorboard"],
     #gradient_accumulation_steps=4,
     #gradient_checkpointing=True,
@@ -164,8 +165,7 @@ trainer = Seq2SeqTrainer(
     eval_dataset=dataset['test'],
     data_collator=data_collator,
     tokenizer=tokenizer,
-
-    compute_metrics=compute_metrics,
+    #compute_metrics=compute_metrics,
     #optimizers=(torch.optim.AdamW, None)
 )
 
